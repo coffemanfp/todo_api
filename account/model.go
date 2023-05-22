@@ -3,7 +3,7 @@ package account
 import (
 	"time"
 
-	"github.com/coffemanfp/todo/auth"
+	"github.com/coffemanfp/todo/utils"
 )
 
 // Account is the representation of the common account data
@@ -28,6 +28,6 @@ func New(accountR Account) (account Account, err error) {
 		return
 	}
 	account = accountR
-	account.Password, err = auth.HashPassword(account.Password)
+	account.Password, err = utils.HashPassword(account.Password)
 	return
 }
