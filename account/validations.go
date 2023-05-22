@@ -7,6 +7,15 @@ import (
 	"github.com/coffemanfp/todo/errors"
 )
 
+func ValidateCredentials(account Account) (err error) {
+	if account.Email != "" {
+		err = ValidateEmail(account.Email)
+	} else if account.Nickname != "" {
+		err = ValidateNickname(account.Nickname)
+	}
+	return
+}
+
 var nicknameRegex = regexp.MustCompile(`^[a-z0-9_-]{3,32}$`)
 
 // ValidateNickname validate the nickname with a regular expression.
