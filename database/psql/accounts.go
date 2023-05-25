@@ -49,14 +49,14 @@ func (ar AccountRepository) MatchCredentials(account account.Account) (id int, e
 func (ar AccountRepository) Register(account account.Account) (id int, err error) {
 	query := `
 		insert into
-			account(name, last_name, nickname, email, password, created_at, updated_at)
+			account(name, last_name, nickname, email, password, created_at)
 		values
-			($1, $2, $3, $4, $5, $6, $7)
+			($1, $2, $3, $4, $5, $6)
 		returning
 			id
 	`
 
-	err = ar.db.QueryRow(query, account.Name, account.LastName, account.Nickname, account.Email, account.Password, account.CreatedAt, account.UpdatedAt).Scan(&id)
+	err = ar.db.QueryRow(query, account.Name, account.LastName, account.Nickname, account.Email, account.Password, account.CreatedAt).Scan(&id)
 	if err != nil {
 		err = fmt.Errorf("failed to insert record in account table: %s", err)
 	}
