@@ -30,9 +30,10 @@ func New(accountR Account) (account Account, err error) {
 		return
 	}
 	account = accountR
-	account.Password, err = utils.HashPassword(account.Password)
-	account.Nickname = html.EscapeString(strings.TrimSpace(account.Nickname))
-	account.Name = html.EscapeString(strings.TrimSpace(account.Name))
-	account.LastName = html.EscapeString(strings.TrimSpace(account.LastName))
+	account.Password, err = utils.HashPassword(accountR.Password)
+	account.Nickname = html.EscapeString(strings.TrimSpace(accountR.Nickname))
+	account.Name = html.EscapeString(strings.TrimSpace(accountR.Name))
+	account.LastName = html.EscapeString(strings.TrimSpace(accountR.LastName))
+	account.CreatedAt = time.Now()
 	return
 }
