@@ -1,6 +1,8 @@
 package account
 
 import (
+	"html"
+	"strings"
 	"time"
 
 	"github.com/coffemanfp/todo/utils"
@@ -23,11 +25,14 @@ type Account struct {
 //	@return account Account: Account builded
 //	@return err error: error in the validation of the based account.
 func New(accountR Account) (account Account, err error) {
-	err = ValidateNickname(accountR.Nickname)
+	err = ValidateCredentials(accountR)
 	if err != nil {
 		return
 	}
 	account = accountR
 	account.Password, err = utils.HashPassword(account.Password)
+	account.Nickname = html.EscapeString(strings.TrimSpace(account.Nickname))
+	account.Name = html.EscapeString(strings.TrimSpace(account.Name))
+	account.LastName = html.EscapeString(strings.TrimSpace(account.LastName))
 	return
 }
