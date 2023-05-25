@@ -17,6 +17,7 @@ type server struct {
 	Host           string   `yaml:"host"`
 	AllowedOrigins []string `yaml:"allowed_origins"`
 	SecretKey      string   `yaml:"secret_key"`
+	JWTLifespan    int      `yaml:"jwt_lifespan"`
 }
 
 type postgreSQLProperties struct {
