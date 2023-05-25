@@ -1,5 +1,7 @@
 create table if not exists account (
     id serial unique not null,
+    name varchar not null,
+    last_name varchar not null,
     nickname varchar unique not null,
     email varchar unique not null,
     password varchar not null,
