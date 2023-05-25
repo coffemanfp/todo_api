@@ -16,7 +16,7 @@ func (l Login) Do(c *gin.Context) {
 	if !ok {
 		return
 	}
-	ok = l.checkCredentials(c, acct)
+	ok = l.validateCredentials(c, acct)
 	if !ok {
 		return
 	}
@@ -27,34 +27,39 @@ func (l Login) Do(c *gin.Context) {
 	}
 
 	// Continue the search login at the database process
-	_, ok = l.getAccountRepository(c)
+	repo, ok := l.getAccountRepository(c)
 	if !ok {
 		return
 	}
+
+	id, ok := l.searchCredentialsInDB(c, acct, repo)
+	if !ok {
+		return
+	}
+
+	token, ok := l.generateToken(c, id)
+	if !ok {
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"token": token,
+	})
 }
 
 func (l Login) readCredentials(c *gin.Context) (acct account.Account, ok bool) {
-	err := c.ShouldBind(&acct)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	}
-	ok = true
-	return
+	return readAccount(c)
 }
 
-func (l Login) checkCredentials(c *gin.Context, acct account.Account) (ok bool) {
-	err := account.ValidateCredentials(acct)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	}
-	ok = true
-	return
+func (l Login) validateCredentials(c *gin.Context, acct account.Account) (ok bool) {
+	return validateCredentials(c, acct)
 }
 
 func (l Login) encryptCredentials(c *gin.Context, acct account.Account) (resAcct account.Account, ok bool) {
 	p, err := utils.HashPassword(acct.Password)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
 	}
 	resAcct.Password = p
 	ok = true
@@ -62,18 +67,25 @@ func (l Login) encryptCredentials(c *gin.Context, acct account.Account) (resAcct
 }
 
 func (l Login) getAccountRepository(c *gin.Context) (repo database.AccountRepository, ok bool) {
-	repo, err := database.GetAccountRepository(db)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	}
-	ok = true
-	return
+	return getAccountRepository(c)
 }
 
 func (l Login) searchCredentialsInDB(c *gin.Context, acct account.Account, repo database.AccountRepository) (id int, ok bool) {
 	id, err := repo.MatchCredentials(acct)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
 	}
+	ok = true
+	return
+}
+
+func (l Login) generateToken(c *gin.Context, id int) (token string, ok bool) {
+	token, err := utils.GenerateToken(id, conf.Server.JWTLifespan, conf.Server.SecretKey)
+	if err != nil {
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
+	}
+	ok = true
 	return
 }
