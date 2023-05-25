@@ -26,4 +26,5 @@ func GetAccountRepository(repoMap Repositories) (repo AccountRepository, err err
 // AccountRepository defines the behaviors to be used by a AccountRepository implementation.
 type AccountRepository interface {
 	MatchCredentials(account account.Account) (id int, err error)
+	Register(accounut account.Account) (id int, err error)
 }
