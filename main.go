@@ -1,20 +1,23 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/coffemanfp/todo/config"
 	"github.com/coffemanfp/todo/database"
 	"github.com/coffemanfp/todo/database/psql"
+	"github.com/coffemanfp/todo/server"
+	"github.com/coffemanfp/todo/server/gin"
+)
+
+var (
+	conf         config.ConfigInfo
+	serverEngine server.Engine
 )
 
 func main() {
-	_, err := config.NewEnvManagerConfig()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// continue the start process
+	serverEngine.Run(fmt.Sprintf(":%d", conf.Server.Port))
 }
 
 func setUpDatabase(conf config.ConfigInfo) (db database.Database, err error) {
@@ -40,4 +43,19 @@ func setUpDatabase(conf config.ConfigInfo) (db database.Database, err error) {
 		database.ACCOUNT_REPOSITORY: accountRepo,
 	}
 	return
+}
+
+func init() {
+	var err error
+	conf, err = config.NewEnvManagerConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	db, err := setUpDatabase(conf)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	serverEngine = gin.New(conf, db)
 }
