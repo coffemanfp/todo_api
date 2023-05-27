@@ -18,3 +18,11 @@ func HashPassword(password string) (string, error) {
 	}
 	return string(bytes), err
 }
+
+func CompareHashAndPassword(hashed, password string) (err error) {
+	err = bcrypt.CompareHashAndPassword([]byte(hashed), []byte(password))
+	if err != nil {
+		err = fmt.Errorf("the password mismatched: %s", err)
+	}
+	return
+}
