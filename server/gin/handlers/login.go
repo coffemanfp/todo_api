@@ -5,6 +5,7 @@ import (
 
 	"github.com/coffemanfp/todo/account"
 	"github.com/coffemanfp/todo/database"
+	"github.com/coffemanfp/todo/server/errors"
 	"github.com/coffemanfp/todo/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -21,18 +22,18 @@ func (l Login) Do(c *gin.Context) {
 		return
 	}
 
-	acct, ok = l.encryptCredentials(c, acct)
-	if !ok {
-		return
-	}
-
 	// Continue the search login at the database process
 	repo, ok := l.getAccountRepository(c)
 	if !ok {
 		return
 	}
 
-	id, ok := l.searchCredentialsInDB(c, acct, repo)
+	id, hash, ok := l.searchCredentialsInDB(c, acct, repo)
+	if !ok {
+		return
+	}
+
+	ok = l.comparePassword(c, hash, acct.Password)
 	if !ok {
 		return
 	}
@@ -48,32 +49,33 @@ func (l Login) Do(c *gin.Context) {
 }
 
 func (l Login) readCredentials(c *gin.Context) (acct account.Account, ok bool) {
-	return readAccount(c)
+	ok = readRequestData(c, &acct)
+	return
 }
 
 func (l Login) validateCredentials(c *gin.Context, acct account.Account) (ok bool) {
 	return validateCredentials(c, acct)
 }
 
-func (l Login) encryptCredentials(c *gin.Context, acct account.Account) (resAcct account.Account, ok bool) {
-	p, err := utils.HashPassword(acct.Password)
+func (l Login) getAccountRepository(c *gin.Context) (repo database.AuthRepository, ok bool) {
+	return getAccountRepository(c)
+}
+
+func (l Login) searchCredentialsInDB(c *gin.Context, acct account.Account, repo database.AuthRepository) (id int, hash string, ok bool) {
+	id, hash, err := repo.GetIdAndHashedPassword(acct)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		err = errors.NewHTTPError(http.StatusUnauthorized, errors.UNAUTHORIZED_ERROR_MESSAGE)
+		handleError(c, err)
 		return
 	}
-	resAcct.Password = p
 	ok = true
 	return
 }
 
-func (l Login) getAccountRepository(c *gin.Context) (repo database.AccountRepository, ok bool) {
-	return getAccountRepository(c)
-}
-
-func (l Login) searchCredentialsInDB(c *gin.Context, acct account.Account, repo database.AccountRepository) (id int, ok bool) {
-	id, err := repo.MatchCredentials(acct)
+func (l Login) comparePassword(c *gin.Context, hash, password string) (ok bool) {
+	err := utils.CompareHashAndPassword(hash, password)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		handleError(c, err)
 		return
 	}
 	ok = true
@@ -83,7 +85,7 @@ func (l Login) searchCredentialsInDB(c *gin.Context, acct account.Account, repo 
 func (l Login) generateToken(c *gin.Context, id int) (token string, ok bool) {
 	token, err := utils.GenerateToken(id, conf.Server.JWTLifespan, conf.Server.SecretKey)
 	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, err)
+		handleError(c, err)
 		return
 	}
 	ok = true

@@ -5,6 +5,7 @@ import (
 
 	"github.com/coffemanfp/todo/account"
 	"github.com/coffemanfp/todo/database"
+	"github.com/coffemanfp/todo/server/errors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,37 +27,41 @@ func (r Register) Do(c *gin.Context) {
 		return
 	}
 
-	id, ok := r.registerAccount(c, acct, repo)
+	id, ok := r.registerAccountInDB(c, acct, repo)
 	if !ok {
 		return
 	}
 
-	c.JSON(http.StatusCreated, id)
+	c.JSON(http.StatusCreated, gin.H{
+		"id": id,
+	})
 
 }
 
 func (r Register) readAccount(c *gin.Context) (acct account.Account, ok bool) {
-	return readAccount(c)
+	ok = readRequestData(c, &acct)
+	return
 }
 
 func (r Register) createNewAccount(c *gin.Context, acctR account.Account) (acct account.Account, ok bool) {
 	acct, err := account.New(acctR)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		err = errors.NewHTTPError(http.StatusBadRequest, err.Error())
+		handleError(c, err)
 		return
 	}
 	ok = true
 	return
 }
 
-func (r Register) getAccountRepository(c *gin.Context) (repo database.AccountRepository, ok bool) {
+func (r Register) getAccountRepository(c *gin.Context) (repo database.AuthRepository, ok bool) {
 	return getAccountRepository(c)
 }
 
-func (r Register) registerAccount(c *gin.Context, acct account.Account, repo database.AccountRepository) (id int, ok bool) {
+func (r Register) registerAccountInDB(c *gin.Context, acct account.Account, repo database.AuthRepository) (id int, ok bool) {
 	id, err := repo.Register(acct)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		handleError(c, err)
 		return
 	}
 	ok = true
