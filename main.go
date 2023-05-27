@@ -34,13 +34,25 @@ func setUpDatabase(conf config.ConfigInfo) (db database.Database, err error) {
 		return
 	}
 
-	accountRepo, err := psql.NewAccountRepository(db.Conn.(*psql.PostgreSQLConnector))
+	authRepo, err := psql.NewAuthRepository(db.Conn.(*psql.PostgreSQLConnector))
+	if err != nil {
+		return
+	}
+
+	listRepo, err := psql.NewListRepository(db.Conn.(*psql.PostgreSQLConnector))
+	if err != nil {
+		return
+	}
+
+	taskRepo, err := psql.NewTaskRepository(db.Conn.(*psql.PostgreSQLConnector))
 	if err != nil {
 		return
 	}
 
 	db.Repositories = map[database.RepositoryID]interface{}{
-		database.ACCOUNT_REPOSITORY: accountRepo,
+		database.AUTH_REPOSITORY: authRepo,
+		database.LIST_REPOSITORY: listRepo,
+		database.TASK_REPOSITORY: taskRepo,
 	}
 	return
 }
