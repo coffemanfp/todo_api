@@ -7,8 +7,8 @@ type RepositoryID string
 
 type Repositories map[RepositoryID]interface{}
 
-func GetRepository(repoMap Repositories, id RepositoryID) (repo interface{}, err error) {
-	repo, ok := repoMap[id]
+func GetRepository[t any](repoMap Repositories, id RepositoryID) (repo t, err error) {
+	repo, ok := repoMap[id].(t)
 	if !ok {
 		err = fmt.Errorf("missing repository: %s not found in repository map", id)
 		return
