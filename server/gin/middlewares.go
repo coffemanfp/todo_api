@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/coffemanfp/todo/config"
+	dbErrors "github.com/coffemanfp/todo/database/errors"
+	sErrors "github.com/coffemanfp/todo/server/errors"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
@@ -71,6 +73,63 @@ func structuredLogger(logger *zerolog.Logger) gin.HandlerFunc {
 			Msg(param.ErrorMessage)
 	}
 }
+
+func authorize(secretKey string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		err := saveTokenContent(c, secretKey)
+		if err != nil {
+			err = sErrors.NewHTTPError(http.StatusUnauthorized, sErrors.UNAUTHORIZED_ERROR_MESSAGE)
+			c.Error(err)
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}
+
+func errorHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Next()
+
+		for _, ginErr := range c.Errors {
+			var isInternal bool
+
+			if err, ok := ginErr.Err.(dbErrors.Error); ok {
+				switch err.Type {
+				case dbErrors.ALREADY_EXISTS:
+					c.JSON(http.StatusConflict, gin.H{
+						"message": sErrors.ALREADY_EXISTS,
+					})
+
+				case dbErrors.NOT_FOUND:
+					c.JSON(http.StatusNotFound, gin.H{
+						"message": sErrors.NOT_FOUND_ERROR_MESSAGE,
+					})
+
+				case dbErrors.UNKNOWN:
+					isInternal = true
+				}
+			} else if err, ok := ginErr.Err.(sErrors.HTTPError); ok {
+				c.JSON(err.Code, gin.H{
+					"message": err.Message,
+				})
+			} else {
+				isInternal = true
+			}
+
+			if isInternal {
+				log.Error().Err(ginErr.Err)
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"message": sErrors.INTERNAL_SERVER_ERROR_MESSAGE,
+				})
+			} else {
+				log.Info().Err(ginErr.Err)
+			}
+		}
+	}
+}
+
 func readToken(c *gin.Context) (token string, err error) {
 	token = c.Query("token")
 	if token != "" {
@@ -83,7 +142,6 @@ func readToken(c *gin.Context) (token string, err error) {
 	}
 	if token == "" {
 		err = errors.New("no token provided")
-		c.AbortWithError(http.StatusUnauthorized, err)
 	}
 	return
 }
@@ -98,7 +156,7 @@ func saveTokenContent(c *gin.Context, secretKey string) (err error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return secretKey, nil
+		return []byte(secretKey), nil
 	})
 	if err != nil {
 		return
@@ -107,8 +165,15 @@ func saveTokenContent(c *gin.Context, secretKey string) (err error) {
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !(ok && token.Valid) {
 		err = errors.New("invalid token")
+		return
 	}
 
-	c.Set("id", claims["account_id"])
+	id, ok := claims["account_id"].(float64)
+	if !ok {
+		err = errors.New("invalid token")
+		return
+	}
+
+	c.Set("id", int(id))
 	return
 }
