@@ -1,10 +1,8 @@
 package account
 
 import (
-	"net/http"
+	"fmt"
 	"regexp"
-
-	"github.com/coffemanfp/todo/errors"
 )
 
 func ValidateCredentials(account Account) (err error) {
@@ -24,7 +22,7 @@ var nicknameRegex = regexp.MustCompile(`^[a-z0-9_-]{3,32}$`)
 //	 @return err error: don't match the regex with the string provided.
 func ValidateNickname(nickname string) (err error) {
 	if !nicknameRegex.MatchString(nickname) {
-		err = errors.NewHTTPError(http.StatusBadRequest, "invalid nickname: invalid nickname format of %s", nickname)
+		err = fmt.Errorf("invalid nickname: invalid nickname format of %s", nickname)
 	}
 	return
 }
@@ -37,7 +35,7 @@ var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-
 //	 @return err error: don't match the regex with the string provided.
 func ValidateEmail(email string) (err error) {
 	if !emailRegex.MatchString(email) {
-		err = errors.NewHTTPError(http.StatusBadRequest, "invalid email: invalid email format of %s", email)
+		err = fmt.Errorf("invalid email: invalid email format of %s", email)
 	}
 	return
 }
