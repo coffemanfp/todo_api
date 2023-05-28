@@ -45,16 +45,61 @@ func (lr ListRepository) GetList(id int) (l list.List, err error) {
 	table := "list"
 	query := fmt.Sprintf(`
 		select
-			title, description, background_picture_url, created_at, created_by
+			id, title, description, background_picture_url, created_at, created_by
 		from
 			%s
 		where
 			id = $1
 	`, table)
 
-	err = lr.db.QueryRow(query, id).Scan(&l.Title, &l.Description, &l.BackgroundPictureURL, &l.CreatedAt, &l.CreatedBy)
+	err = lr.db.QueryRow(query, id).Scan(&l.ID, &l.Title, &l.Description, &l.BackgroundPictureURL, &l.CreatedAt, &l.CreatedBy)
 	if err != nil {
 		err = errorInRow(table, "get", err)
+	}
+	return
+}
+
+func (lr ListRepository) GetSomeLists(page, createdBy int) (ls []*list.List, err error) {
+	table := "list"
+	query := fmt.Sprintf(`
+		select
+			id, title, description, background_picture_url, created_at, created_by
+		from
+			%s
+		where
+			created_by = $1
+		limit
+			$2
+		offset
+			$3
+	`, table)
+
+	limit, offset := parsePagination(page)
+
+	rows, err := lr.db.Query(query, createdBy, limit, offset)
+	if err != nil {
+		err = errorInRow(table, "get", err)
+		return
+	}
+
+	ls = make([]*list.List, 0)
+	for rows.Next() {
+		l := new(list.List)
+		l.Title = new(string)
+		l.Description = new(string)
+		err = rows.Scan(&l.ID, &l.Title, &l.Description, &l.BackgroundPictureURL, &l.CreatedAt, &l.CreatedBy)
+		if err != nil {
+			err = errorInRow(table, "scan", err)
+			ls = nil
+			return
+		}
+
+		ls = append(ls, l)
+	}
+	err = rows.Err()
+	if err != nil {
+		ls = nil
+		err = errorInRows(table, "scanning", err)
 	}
 	return
 }

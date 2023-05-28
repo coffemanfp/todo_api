@@ -23,7 +23,7 @@ func NewTaskRepository(conn *PostgreSQLConnector) (repo database.TaskRepository,
 	return
 }
 
-func (lr TaskRepository) CreateTask(t task.Task) (id int, err error) {
+func (tr TaskRepository) CreateTask(t task.Task) (id int, err error) {
 	table := "task"
 	query := fmt.Sprintf(`
 		insert into
@@ -33,14 +33,14 @@ func (lr TaskRepository) CreateTask(t task.Task) (id int, err error) {
 		returning
 			id
 	`, table)
-	err = lr.db.QueryRow(query, t.Title, t.Description, t.ListID, t.CreatedBy, t.CreatedAt).Scan(&id)
+	err = tr.db.QueryRow(query, t.Title, t.Description, t.ListID, t.CreatedBy, t.CreatedAt).Scan(&id)
 	if err != nil {
 		err = errorInRow(table, "insert", err)
 	}
 	return
 }
 
-func (lr TaskRepository) GetTask(id int) (t task.Task, err error) {
+func (tr TaskRepository) GetTask(id int) (t task.Task, err error) {
 	table := "task"
 	query := fmt.Sprintf(`
 		select
@@ -53,7 +53,7 @@ func (lr TaskRepository) GetTask(id int) (t task.Task, err error) {
 
 	t.Title = new(string)
 	t.Description = new(string)
-	err = lr.db.QueryRow(query, id).Scan(&t.ID, &t.Title, &t.Description, &t.ListID, &t.CreatedAt, &t.CreatedBy)
+	err = tr.db.QueryRow(query, id).Scan(&t.ID, &t.Title, &t.Description, &t.ListID, &t.CreatedAt, &t.CreatedBy)
 	if err != nil {
 		t = task.Task{}
 		err = errorInRow(table, "get", err)
@@ -61,7 +61,7 @@ func (lr TaskRepository) GetTask(id int) (t task.Task, err error) {
 	return
 }
 
-func (lr TaskRepository) GetSomeTasks(page, createdBy int) (ts []*task.Task, err error) {
+func (tr TaskRepository) GetSomeTasks(page, createdBy int) (ts []*task.Task, err error) {
 	table := "task"
 	query := fmt.Sprintf(`
 		select
@@ -78,7 +78,7 @@ func (lr TaskRepository) GetSomeTasks(page, createdBy int) (ts []*task.Task, err
 
 	limit, offset := parsePagination(page)
 
-	rows, err := lr.db.Query(query, createdBy, limit, offset)
+	rows, err := tr.db.Query(query, createdBy, limit, offset)
 	if err != nil {
 		err = errorInRow(table, "get", err)
 		return
@@ -106,7 +106,7 @@ func (lr TaskRepository) GetSomeTasks(page, createdBy int) (ts []*task.Task, err
 	return
 }
 
-func (lr TaskRepository) UpdateTask(t task.Task) (err error) {
+func (tr TaskRepository) UpdateTask(t task.Task) (err error) {
 	table := "task"
 	query := fmt.Sprintf(`
 		update
@@ -119,14 +119,14 @@ func (lr TaskRepository) UpdateTask(t task.Task) (err error) {
 			id = $4
 	`, table)
 
-	_, err = lr.db.Exec(query, t.Title, t.Description, t.ListID, t.ID)
+	_, err = tr.db.Exec(query, t.Title, t.Description, t.ListID, t.ID)
 	if err != nil {
 		err = errorInRow(table, "update", err)
 	}
 	return
 }
 
-func (lr TaskRepository) DeleteTask(id int) (err error) {
+func (tr TaskRepository) DeleteTask(id int) (err error) {
 	table := "task"
 	query := fmt.Sprintf(`
 		delete from
@@ -135,7 +135,7 @@ func (lr TaskRepository) DeleteTask(id int) (err error) {
 			id = $1
 	`, table)
 
-	_, err = lr.db.Exec(query, id)
+	_, err = tr.db.Exec(query, id)
 	if err != nil {
 		err = errorInRow(table, "delete", err)
 	}
