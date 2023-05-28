@@ -43,6 +43,7 @@ func (ge GinEngine) setListHandlers(r *gin.RouterGroup) {
 	list := r.Group("/list")
 	list.Use(authorize(ge.conf.Server.SecretKey))
 	list.GET("/:id", handlers.GetList{}.Do)
+	list.GET("", handlers.GetSomeLists{}.Do)
 	list.POST("", handlers.CreateList{}.Do)
 	list.PUT("/:id", handlers.UpdateList{}.Do)
 	list.DELETE("/:id", handlers.DeleteList{}.Do)
