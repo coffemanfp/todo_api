@@ -1,0 +1,395 @@
+openapi: 3.0.0
+info:
+  title: TODO
+  contact: {}
+  version: '1.0'
+servers:
+- url: https://github.com/coffemanfp/todo
+  variables:
+    version:
+      default: v1
+paths:
+  /list/{list_id}:
+    get:
+      tags:
+      - List
+      summary: Get list
+      operationId: Getlist
+      parameters:
+      - name: list_id
+        in: path
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+      - bearer: []
+    delete:
+      tags:
+      - List
+      summary: Delete list
+      operationId: Deletelist
+      parameters:
+      - name: list_id
+        in: path
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+      - bearer: []
+    put:
+      tags:
+      - List
+      summary: Update list
+      operationId: Updatelist
+      parameters:
+      - name: list_id
+        in: path
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/UpdatelistRequest'
+              - example:
+                  title: Una nueva lista! 3
+                  description: Descripcion nueva
+            example:
+              title: Una nueva lista! 3
+              description: Descripcion nueva
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+      - bearer: []
+  /auth/register:
+    post:
+      tags:
+      - Authentication
+      summary: Register 
+      operationId: Register
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/RegisterRequest'
+              - example:
+                  name: Franklin
+                  last_name: Peñaranda
+                  nickname: coffemanfp4
+                  email: coffemanfp4@gmail.com
+                  password: '24061502'
+            example:
+              name: Franklin
+              last_name: Peñaranda
+              nickname: coffemanfp4
+              email: coffemanfp4@gmail.com
+              password: '24061502'
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+  /task:
+    post:
+      tags:
+      - Task
+      summary: Create task 
+      operationId: Createtask
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          text/plain:
+            schema:
+              type: string
+              example: >-
+                {
+                    "title": "Una nueva tarea con todo!",
+                    "description": "Una descripcion!",
+                    "list_id": {{list_id}}
+                }
+            example: >-
+              {
+                  "title": "Una nueva tarea con todo!",
+                  "description": "Una descripcion!",
+                  "list_id": {{list_id}}
+              }
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+      - bearer: []
+    get:
+      tags:
+      - Task
+      summary: Get Some Task 
+      operationId: GetSomeTask
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+      - bearer: []
+  /auth/login:
+    post:
+      tags:
+      - Authentication
+      summary: Login 
+      operationId: Login
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/LoginRequest'
+              - example:
+                  nickname: coffemanfp
+                  email: coffemanfp@gmail.com
+                  password: '24061502'
+            example:
+              nickname: coffemanfp
+              email: coffemanfp@gmail.com
+              password: '24061502'
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+  /list:
+    post:
+      tags:
+      - List
+      summary: Create list 
+      operationId: Createlist
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          text/plain:
+            schema:
+              type: string
+              example: >-
+                {
+                    "title": "Una nueva lista!",
+                    "description": "Esta es una lista con descripcion",
+                    "background_picture_url": "https://picsum.photos/400/500",
+                    "created_by": {{account_id}}
+                }
+            example: >-
+              {
+                  "title": "Una nueva lista!",
+                  "description": "Esta es una lista con descripcion",
+                  "background_picture_url": "https://picsum.photos/400/500",
+                  "created_by": {{account_id}}
+              }
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+      - bearer: []
+  /task/{task_id}:
+    get:
+      tags:
+      - Task
+      summary: Get Task 
+      operationId: GetTask
+      parameters:
+      - name: task_id
+        in: path
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+      - bearer: []
+    delete:
+      tags:
+      - Task
+      summary: Delete Task 
+      operationId: DeleteTask
+      parameters:
+      - name: task_id
+        in: path
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+      - bearer: []
+    put:
+      tags:
+      - Task
+      summary: Update task 
+      operationId: Updatetask
+      parameters:
+      - name: task_id
+        in: path
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/UpdatetaskRequest'
+              - example:
+                  title: Una nueva tarea con todo! 2
+                  description: Una descripcion! 2
+                  list_id: 2
+            example:
+              title: Una nueva tarea con todo! 2
+              description: Una descripcion! 2
+              list_id: 2
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+      - bearer: []
+components:
+  schemas:
+    RegisterRequest:
+      title: RegisterRequest
+      required:
+      - name
+      - last_name
+      - nickname
+      - email
+      - password
+      type: object
+      properties:
+        name:
+          type: string
+        last_name:
+          type: string
+        nickname:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+      example:
+        name: John
+        last_name: Doe
+        nickname: johndoe
+        email: johndoe@example.com
+        password: 'password123'
+    UpdatelistRequest:
+      title: UpdatelistRequest
+      required:
+      - title
+      - description
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+      example:
+        title: A new list! 3
+        description: New description
+    LoginRequest:
+      title: LoginRequest
+      required:
+      - nickname
+      - email
+      - password
+      type: object
+      properties:
+        nickname:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+      example:
+        nickname: johndoe
+        email: johndoe@example.com
+        password: 'password123'
+    UpdatetaskRequest:
+      title: UpdatetaskRequest
+      required:
+      - title
+      - description
+      - list_id
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        list_id:
+          type: integer
+          format: int32
+      example:
+        title: A new task with everything! 2
+        description: Description! 2
+        list_id: 2
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+security: []
+tags:
+  - name: List
+    description: List management operations.
+  - name: Task
+    description: Task management operations.
+  - name: Auth
+    description: Authentication operations.
