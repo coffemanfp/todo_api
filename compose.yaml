@@ -13,7 +13,7 @@ services:
       context: .
       target: final
     ports:
-      - 8000:8000
+      - 8080:8080
     depends_on:
       db:
         condition: service_healthy
@@ -26,6 +26,7 @@ services:
     secrets:
       - db-password
     volumes:
+      - ./migrations/migrations.sql:/docker-entrypoint-initdb.d/0_init.sql
       - db-data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=tododb
