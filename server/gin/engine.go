@@ -23,6 +23,7 @@ func New(conf config.ConfigInfo, db database.Database) server.Engine {
 
 	handlers.Init(ge.db.Repositories, ge.conf)
 
+	ge.r.Use(newCors(ge.conf))
 	ge.r.Use(errorHandler())
 	v1 := ge.r.Group("/v1")
 
@@ -60,7 +61,6 @@ func (ge GinEngine) setTaskHandlers(r *gin.RouterGroup) {
 }
 
 func (ge GinEngine) setCommonMiddlewares(r *gin.RouterGroup) {
-	r.Use(newCors(ge.conf))
 	r.Use(gin.Recovery())
 	r.Use(logger())
 }
