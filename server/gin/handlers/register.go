@@ -6,6 +6,7 @@ import (
 	"github.com/coffemanfp/todo/account"
 	"github.com/coffemanfp/todo/database"
 	"github.com/coffemanfp/todo/server/errors"
+	"github.com/coffemanfp/todo/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,8 +33,13 @@ func (r Register) Do(c *gin.Context) {
 		return
 	}
 
+	token, ok := r.generateToken(c, id)
+	if !ok {
+		return
+	}
+
 	c.JSON(http.StatusCreated, gin.H{
-		"id": id,
+		"token": token,
 	})
 
 }
@@ -60,6 +66,16 @@ func (r Register) getAccountRepository(c *gin.Context) (repo database.AuthReposi
 
 func (r Register) registerAccountInDB(c *gin.Context, acct account.Account, repo database.AuthRepository) (id int, ok bool) {
 	id, err := repo.Register(acct)
+	if err != nil {
+		handleError(c, err)
+		return
+	}
+	ok = true
+	return
+}
+
+func (r Register) generateToken(c *gin.Context, id int) (token string, ok bool) {
+	token, err := utils.GenerateToken(id, conf.Server.JWTLifespan, conf.Server.SecretKey)
 	if err != nil {
 		handleError(c, err)
 		return
