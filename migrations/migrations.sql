@@ -48,9 +48,14 @@ create table if not exists list_category_union (
 create table if not exists task (
     id serial unique not null,
     created_by integer not null,
-    list_id integer not null,
+    list_id integer,
     title varchar not null,
     description varchar,
+    is_important boolean,
+    is_added_to_my_day boolean,
+    reminder timestamp,
+    due_date timestamp,
+    repeat varchar,
     created_at timestamp not null,
 
     primary key (id),

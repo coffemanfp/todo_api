@@ -7,16 +7,21 @@ import (
 )
 
 type Task struct {
-	ID          int       `json:"id,omitempty"`
-	ListID      int       `json:"list_id,omitempty"`
-	Title       *string   `json:"title,omitempty"`
-	Description *string   `json:"description,omitempty"`
-	CreatedAt   time.Time `json:"created_at,omitempty"`
-	CreatedBy   int       `json:"created_by,omitempty"`
+	ID             int        `json:"id,omitempty"`
+	ListID         *int       `json:"list_id,omitempty"`
+	Title          *string    `json:"title,omitempty"`
+	Description    *string    `json:"description,omitempty"`
+	IsAddedToMyDay *bool      `json:"is_added_to_my_day,omitempty"`
+	IsImportant    *bool      `json:"is_important,omitempty"`
+	Reminder       *time.Time `json:"reminder,omitempty"`
+	DueDate        *time.Time `json:"due_date,omitempty"`
+	Repeat         *string    `json:"repeat,omitempty"`
+	CreatedAt      time.Time  `json:"created_at,omitempty"`
+	CreatedBy      int        `json:"created_by,omitempty"`
 }
 
 func New(taskR Task) (task Task, err error) {
-	err = validateListID(taskR.ListID)
+	err = validateCreator(taskR.CreatedBy)
 	if err != nil {
 		return
 	}
@@ -47,6 +52,10 @@ func populatePointerValues(taskR Task) (task Task) {
 	if taskR.Description != nil {
 		task.Description = new(string)
 		*task.Description = utils.RemoveSpaceAndConvertSpecialChars(*taskR.Description)
+	}
+	if taskR.Repeat != nil {
+		task.Repeat = new(string)
+		*task.Repeat = utils.RemoveSpaceAndConvertSpecialChars(*taskR.Repeat)
 	}
 	return
 }

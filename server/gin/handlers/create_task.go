@@ -32,9 +32,9 @@ func (ct CreateTask) Do(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"id": id,
-	})
+	t.ID = id
+
+	c.JSON(http.StatusCreated, t)
 }
 
 func (ct CreateTask) readTask(c *gin.Context) (t task.Task, ok bool) {
