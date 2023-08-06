@@ -27,13 +27,13 @@ func (tr TaskRepository) CreateTask(t task.Task) (id int, err error) {
 	table := "task"
 	query := fmt.Sprintf(`
 		insert into
-			%s(title, description, list_id, reminder, due_date, repeat, is_added_to_my_day, is_important, created_by, created_at)
+			%s(title, description, list_id, reminder, due_date, repeat, is_done, is_added_to_my_day, is_important, created_by, created_at)
 		values
-			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 		returning
 			id
 	`, table)
-	err = tr.db.QueryRow(query, t.Title, t.Description, &t.ListID, t.Reminder, t.DueDate, t.Repeat, t.IsAddedToMyDay, t.IsImportant, t.CreatedBy, t.CreatedAt).Scan(&id)
+	err = tr.db.QueryRow(query, t.Title, t.Description, &t.ListID, t.Reminder, t.DueDate, t.Repeat, t.IsDone, t.IsAddedToMyDay, t.IsImportant, t.CreatedBy, t.CreatedAt).Scan(&id)
 	if err != nil {
 		err = errorInRow(table, "insert", err)
 	}
@@ -44,7 +44,7 @@ func (tr TaskRepository) GetTask(id int) (t task.Task, err error) {
 	table := "task"
 	query := fmt.Sprintf(`
 		select
-			id, title, description, list_id, reminder, due_date, repeat, is_added_to_my_day, is_important, created_at, created_by
+			id, title, description, list_id, reminder, due_date, repeat, is_done, is_added_to_my_day, is_important, created_at, created_by
 		from
 			%s
 		where
@@ -53,7 +53,7 @@ func (tr TaskRepository) GetTask(id int) (t task.Task, err error) {
 
 	t.Title = new(string)
 	t.Description = new(string)
-	err = tr.db.QueryRow(query, id).Scan(&t.ID, &t.Title, &t.Description, &t.ListID, &t.Reminder, &t.DueDate, &t.Repeat, &t.IsAddedToMyDay, &t.IsImportant, &t.CreatedAt, &t.CreatedBy)
+	err = tr.db.QueryRow(query, id).Scan(&t.ID, &t.Title, &t.Description, &t.ListID, &t.Reminder, &t.DueDate, &t.Repeat, &t.IsDone, &t.IsAddedToMyDay, &t.IsImportant, &t.CreatedAt, &t.CreatedBy)
 	if err != nil {
 		t = task.Task{}
 		err = errorInRow(table, "get", err)
@@ -65,7 +65,7 @@ func (tr TaskRepository) GetSomeTasks(page, createdBy int) (ts []*task.Task, err
 	table := "task"
 	query := fmt.Sprintf(`
 		select
-			id, title, description, list_id, reminder, due_date, repeat, is_added_to_my_day, is_important, created_at, created_by
+			id, title, description, list_id, reminder, due_date, repeat, is_done, is_added_to_my_day, is_important, created_at, created_by
 		from
 			%s
 		where
@@ -89,7 +89,7 @@ func (tr TaskRepository) GetSomeTasks(page, createdBy int) (ts []*task.Task, err
 		t := new(task.Task)
 		t.Title = new(string)
 		t.Description = new(string)
-		err = rows.Scan(&t.ID, &t.Title, &t.Description, &t.ListID, &t.Reminder, &t.DueDate, &t.Repeat, &t.IsAddedToMyDay, &t.IsImportant, &t.CreatedAt, &t.CreatedBy)
+		err = rows.Scan(&t.ID, &t.Title, &t.Description, &t.ListID, &t.Reminder, &t.DueDate, &t.Repeat, &t.IsDone, &t.IsAddedToMyDay, &t.IsImportant, &t.CreatedAt, &t.CreatedBy)
 		if err != nil {
 			err = errorInRow(table, "scan", err)
 			ts = nil
@@ -118,13 +118,14 @@ func (tr TaskRepository) UpdateTask(t task.Task) (err error) {
 			reminder = coalesce($4, reminder),
 			due_date = coalesce($5, due_date),
 			repeat = coalesce($6, repeat),
-			is_added_to_my_day = coalesce($7, is_added_to_my_day),
-			is_important = coalesce($8, is_important)
+			is_done = coalesce($7, is_done),
+			is_added_to_my_day = coalesce($8, is_added_to_my_day),
+			is_important = coalesce($9, is_important)
 		where
-			id = $9
+			id = $10
 	`, table)
 
-	_, err = tr.db.Exec(query, t.Title, t.Description, t.ListID, t.Reminder, t.DueDate, t.Repeat, t.IsAddedToMyDay, t.IsImportant, t.ID)
+	_, err = tr.db.Exec(query, t.Title, t.Description, t.ListID, t.Reminder, t.DueDate, t.Repeat, t.IsDone, t.IsAddedToMyDay, t.IsImportant, t.ID)
 	if err != nil {
 		err = errorInRow(table, "update", err)
 	}

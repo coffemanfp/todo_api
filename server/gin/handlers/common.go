@@ -10,7 +10,7 @@ import (
 )
 
 func readRequestData(c *gin.Context, v interface{}) (ok bool) {
-	err := c.ShouldBind(v)
+	err := c.ShouldBindJSON(v)
 	if err != nil {
 		handleError(c, err)
 		return

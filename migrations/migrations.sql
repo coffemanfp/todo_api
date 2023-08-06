@@ -51,6 +51,7 @@ create table if not exists task (
     list_id integer,
     title varchar not null,
     description varchar,
+    is_done boolean,
     is_important boolean,
     is_added_to_my_day boolean,
     reminder timestamp,
