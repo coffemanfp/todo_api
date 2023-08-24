@@ -30,7 +30,7 @@ func (gt GetTask) Do(c *gin.Context) {
 }
 
 func (gt GetTask) readTaskID(c *gin.Context) (id int, ok bool) {
-	return readIntParam(c, "id")
+	return readIntFromURL(c, "id", false)
 }
 
 func (gt GetTask) getTaskFromDB(c *gin.Context, repo database.TaskRepository, id int) (t task.Task, ok bool) {

@@ -31,6 +31,7 @@ func New(conf config.ConfigInfo, db database.Database) server.Engine {
 	ge.setAuthHandlers(v1)
 	ge.setListHandlers(v1)
 	ge.setTaskHandlers(v1)
+	ge.setSearchHandlers(v1)
 	return ge.r
 }
 
@@ -58,6 +59,16 @@ func (ge GinEngine) setTaskHandlers(r *gin.RouterGroup) {
 	task.POST("", handlers.CreateTask{}.Do)
 	task.PUT("/:id", handlers.UpdateTask{}.Do)
 	task.DELETE("/:id", handlers.DeleteTask{}.Do)
+}
+
+// setSearchHandlers configures search-related routes and handlers.
+func (ge GinEngine) setSearchHandlers(r *gin.RouterGroup) {
+	// Create a sub-group for search routes
+	product := r.Group("/search")
+	// Use authorization middleware to protect this route
+	product.Use(authorize(ge.conf.Server.SecretKey))
+	// Configure endpoint for searching products
+	product.GET("", handlers.Search{}.Do)
 }
 
 func (ge GinEngine) setCommonMiddlewares(r *gin.RouterGroup) {

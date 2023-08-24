@@ -30,7 +30,7 @@ func (gl GetList) Do(c *gin.Context) {
 }
 
 func (gl GetList) readListID(c *gin.Context) (id int, ok bool) {
-	return readIntParam(c, "id")
+	return readIntFromURL(c, "id", false)
 }
 
 func (gl GetList) getListFromDB(c *gin.Context, id int, repo database.ListRepository) (l list.List, ok bool) {
