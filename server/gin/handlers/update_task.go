@@ -58,7 +58,7 @@ func (ut UpdateTask) updateTask(c *gin.Context, id int, tR task.Task) (t task.Ta
 }
 
 func (ut UpdateTask) readTaskID(c *gin.Context) (id int, ok bool) {
-	return readIntParam(c, "id")
+	return readIntFromURL(c, "id", false)
 }
 
 func (ut UpdateTask) updateTaskInDB(c *gin.Context, repo database.TaskRepository, t task.Task) (ok bool) {

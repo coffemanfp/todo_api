@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"fmt"
+	"net/http"
 	"strconv"
 
 	"github.com/coffemanfp/todo/account"
 	"github.com/coffemanfp/todo/database"
+	"github.com/coffemanfp/todo/server/errors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -59,8 +61,13 @@ func getTaskRepository(c *gin.Context) (repo database.TaskRepository, ok bool) {
 	return
 }
 
-func readIntParam(c *gin.Context, param string) (v int, ok bool) {
-	p := c.Param(param)
+func readIntFromURL(c *gin.Context, param string, isQueryParam bool) (v int, ok bool) {
+	var p string
+	if isQueryParam {
+		p = c.Query(param)
+	} else {
+		p = c.Param(param)
+	}
 	if p == "" {
 		ok = true
 		return
@@ -68,6 +75,32 @@ func readIntParam(c *gin.Context, param string) (v int, ok bool) {
 	v, err := strconv.Atoi(p)
 	if err != nil {
 		err = fmt.Errorf("invalid %s param: %s", param, p)
+		err = errors.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
+		handleError(c, err)
+		return
+	}
+
+	ok = true
+	return
+}
+
+func readBoolFromURL(c *gin.Context, param string, isQueryParam bool) (v *bool, ok bool) {
+	var p string
+	if isQueryParam {
+		p = c.Query(param)
+	} else {
+		p = c.Param(param)
+	}
+	var aux bool
+	if p == "true" {
+		aux = true
+		v = &aux
+	} else if p == "false" {
+		aux = false
+		v = &aux
+	} else if p != "" {
+		err := fmt.Errorf("invalid %s param: %s", param, p)
+		err = errors.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
 		handleError(c, err)
 		return
 	}
@@ -77,7 +110,7 @@ func readIntParam(c *gin.Context, param string) (v int, ok bool) {
 }
 
 func readPagination(c *gin.Context) (page int, ok bool) {
-	page, ok = readIntParam(c, "page")
+	page, ok = readIntFromURL(c, "page", true)
 	return
 }
 

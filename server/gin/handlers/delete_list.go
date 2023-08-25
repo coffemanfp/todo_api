@@ -29,7 +29,7 @@ func (dl DeleteList) Do(c *gin.Context) {
 }
 
 func (dl DeleteList) readListId(c *gin.Context) (id int, ok bool) {
-	return readIntParam(c, "id")
+	return readIntFromURL(c, "id", false)
 }
 
 func (dl DeleteList) deleteListFromDB(c *gin.Context, repo database.ListRepository, id int) (ok bool) {

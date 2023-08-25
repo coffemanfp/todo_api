@@ -41,7 +41,7 @@ func (ul UpdateList) Do(c *gin.Context) {
 }
 
 func (ul UpdateList) readListID(c *gin.Context) (id int, ok bool) {
-	return readIntParam(c, "id")
+	return readIntFromURL(c, "id", false)
 }
 
 func (ul UpdateList) readList(c *gin.Context) (l list.List, ok bool) {

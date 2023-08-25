@@ -29,7 +29,7 @@ func (dt DeleteTask) Do(c *gin.Context) {
 }
 
 func (dt DeleteTask) readTaskID(c *gin.Context) (id int, ok bool) {
-	return readIntParam(c, "id")
+	return readIntFromURL(c, "id", false)
 }
 
 func (dt DeleteTask) deleteTaskInDB(c *gin.Context, repo database.TaskRepository, id int) (ok bool) {
