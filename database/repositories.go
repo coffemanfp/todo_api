@@ -11,7 +11,6 @@ func GetRepository[t any](repoMap Repositories, id RepositoryID) (repo t, err er
 	repo, ok := repoMap[id].(t)
 	if !ok {
 		err = fmt.Errorf("missing repository: %s not found in repository map", id)
-		return
 	}
 	return
 }

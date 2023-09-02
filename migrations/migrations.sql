@@ -19,7 +19,7 @@ create table if not exists list_category (
     created_by integer not null,
 
     primary key (id),
-    foreign key (created_by) references account(id) ON DELETE CASCADE
+    foreign key (created_by) references account(id) on delete cascade
 );
 
 create table if not exists list (
@@ -31,7 +31,7 @@ create table if not exists list (
     created_by integer not null,
 
     primary key (id),
-    foreign key (created_by) references account(id) ON DELETE CASCADE
+    foreign key (created_by) references account(id) on delete cascade
 );
 
 create table if not exists list_category_union (
@@ -41,8 +41,8 @@ create table if not exists list_category_union (
     created_by integer not null,
 
     primary key (id),
-    foreign key (list_id) references list(id) ON DELETE CASCADE,
-    foreign key (category_id) references list_category(id) ON DELETE CASCADE
+    foreign key (list_id) references list(id) on delete cascade,
+    foreign key (category_id) references list_category(id) on delete cascade
 );
 
 create table if not exists task (
@@ -60,8 +60,8 @@ create table if not exists task (
     created_at timestamp not null,
 
     primary key (id),
-    foreign key (list_id) references list(id) ON DELETE CASCADE,
-    foreign key (created_by) references account(id) ON DELETE CASCADE
+    foreign key (list_id) references list(id) on delete cascade,
+    foreign key (created_by) references account(id) on delete cascade
 );
 
 create table if not exists account_preferences (
@@ -70,5 +70,27 @@ create table if not exists account_preferences (
     preferences jsonb not null,
 
     primary key (id),
-    foreign key (account_id) references account(id) ON DELETE CASCADE
+    foreign key (account_id) references account(id) on delete cascade
+);
+
+create table if not exists category  (
+    id serial unique not null,
+    name varchar not null,
+    color varchar not null,
+    created_at timestamp not null,
+    created_by integer not null,
+
+    primary key (id), 
+    foreign key (created_by) references account(id) on delete cascade
+);
+
+create table if not exists task_category (
+    id serial unique not null,
+    task_id integer not null,
+    category_id integer not null,
+    created_at timestamp not null,
+
+    primary key (id),
+    foreign key (task_id) references task(id),
+    foreign key (category_id) references category(id)
 );

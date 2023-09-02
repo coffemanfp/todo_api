@@ -32,6 +32,7 @@ func New(conf config.ConfigInfo, db database.Database) server.Engine {
 	ge.setListHandlers(v1)
 	ge.setTaskHandlers(v1)
 	ge.setSearchHandlers(v1)
+	ge.setCategoriesHandlers(v1)
 	return ge.r
 }
 
@@ -42,7 +43,7 @@ func (ge GinEngine) setAuthHandlers(r *gin.RouterGroup) {
 }
 
 func (ge GinEngine) setListHandlers(r *gin.RouterGroup) {
-	list := r.Group("/list")
+	list := r.Group("/lists")
 	list.Use(authorize(ge.conf.Server.SecretKey))
 	list.GET("/:id", handlers.GetList{}.Do)
 	list.GET("", handlers.GetSomeLists{}.Do)
@@ -52,13 +53,22 @@ func (ge GinEngine) setListHandlers(r *gin.RouterGroup) {
 }
 
 func (ge GinEngine) setTaskHandlers(r *gin.RouterGroup) {
-	task := r.Group("/task")
+	task := r.Group("/tasks")
 	task.Use(authorize(ge.conf.Server.SecretKey))
 	task.GET("", handlers.GetSomeTasks{}.Do)
 	task.GET("/:id", handlers.GetTask{}.Do)
 	task.POST("", handlers.CreateTask{}.Do)
 	task.PUT("/:id", handlers.UpdateTask{}.Do)
 	task.DELETE("/:id", handlers.DeleteTask{}.Do)
+}
+
+func (ge GinEngine) setCategoriesHandlers(r *gin.RouterGroup) {
+	category := r.Group("/categories")
+	category.Use(authorize(ge.conf.Server.SecretKey))
+	category.GET("", handlers.GetSomeCategories{}.Do)
+	category.POST("", handlers.CreateCategory{}.Do)
+	category.PUT("/:id", handlers.UpdateCategory{}.Do)
+	category.DELETE("/:id", handlers.DeleteCategory{}.Do)
 }
 
 // setSearchHandlers configures search-related routes and handlers.

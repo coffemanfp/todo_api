@@ -48,11 +48,16 @@ func setUpDatabase(conf config.ConfigInfo) (db database.Database, err error) {
 	if err != nil {
 		return
 	}
+	categoryRepo, err := psql.NewCategoryRepository(db.Conn.(*psql.PostgreSQLConnector))
+	if err != nil {
+		return
+	}
 
 	db.Repositories = map[database.RepositoryID]interface{}{
-		database.AUTH_REPOSITORY: authRepo,
-		database.LIST_REPOSITORY: listRepo,
-		database.TASK_REPOSITORY: taskRepo,
+		database.AUTH_REPOSITORY:     authRepo,
+		database.LIST_REPOSITORY:     listRepo,
+		database.TASK_REPOSITORY:     taskRepo,
+		database.CATEGORY_REPOSITORY: categoryRepo,
 	}
 	return
 }

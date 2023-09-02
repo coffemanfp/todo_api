@@ -19,6 +19,8 @@ type Task struct {
 	Repeat         *string     `json:"repeat,omitempty"`
 	CreatedAt      time.Time   `json:"created_at,omitempty"`
 	CreatedBy      int         `json:"created_by,omitempty"`
+
+	Categories []*Category `json:"categories,omitempty"`
 }
 
 func New(taskR Task) (task Task, err error) {
