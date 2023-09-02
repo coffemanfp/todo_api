@@ -14,6 +14,7 @@ import (
 func readRequestData(c *gin.Context, v interface{}) (ok bool) {
 	err := c.ShouldBindJSON(v)
 	if err != nil {
+		err = errors.NewHTTPError(http.StatusBadRequest, err.Error())
 		handleError(c, err)
 		return
 	}
@@ -53,6 +54,16 @@ func getListRepository(c *gin.Context) (repo database.ListRepository, ok bool) {
 
 func getTaskRepository(c *gin.Context) (repo database.TaskRepository, ok bool) {
 	repo, err := database.GetRepository[database.TaskRepository](db, database.TASK_REPOSITORY)
+	if err != nil {
+		handleError(c, err)
+		return
+	}
+	ok = true
+	return
+}
+
+func getCategoryRepository(c *gin.Context) (repo database.CategoryRepository, ok bool) {
+	repo, err := database.GetRepository[database.CategoryRepository](db, database.CATEGORY_REPOSITORY)
 	if err != nil {
 		handleError(c, err)
 		return
