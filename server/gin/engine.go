@@ -69,6 +69,7 @@ func (ge GinEngine) setCategoriesHandlers(r *gin.RouterGroup) {
 	category.POST("", handlers.CreateCategory{}.Do)
 	category.PUT("/:id", handlers.UpdateCategory{}.Do)
 	category.DELETE("/:id", handlers.DeleteCategory{}.Do)
+	category.POST("/binds", handlers.CreateCategoryBind{}.Do)
 }
 
 // setSearchHandlers configures search-related routes and handlers.

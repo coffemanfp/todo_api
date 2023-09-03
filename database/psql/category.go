@@ -40,6 +40,23 @@ func (cr CategoryRepository) CreateCategory(c task.Category) (id int, err error)
 	return
 }
 
+func (cr CategoryRepository) CreateCategoryBind(taskID, categoryID int) (id int, err error) {
+	table := "task_category"
+	query := fmt.Sprintf(`
+		insert into
+			%s(task_id, category_id)
+		values
+			($1, $2)
+		returning
+			id
+	`, table)
+	err = cr.db.QueryRow(query, taskID, categoryID).Scan(&id)
+	if err != nil {
+		err = errorInRow(table, "insert", err)
+	}
+	return
+}
+
 func (cr CategoryRepository) GetSomeCategories(page, createdBy int) (cs []*task.Category, err error) {
 	table := "category"
 	query := fmt.Sprintf(`

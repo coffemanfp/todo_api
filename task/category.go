@@ -37,7 +37,7 @@ func NewCategory(c Category) (category Category, err error) {
 	category.CreatedBy = c.CreatedBy
 	category.Name = c.Name
 	category.Color = c.Color
-	c.CreatedAt = time.Now()
+	category.CreatedAt = time.Now()
 	return
 }
 
