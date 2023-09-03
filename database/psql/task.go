@@ -59,6 +59,46 @@ func (tr TaskRepository) GetTask(id int) (t task.Task, err error) {
 		t = task.Task{}
 		err = errorInRow(table, "get", err)
 	}
+
+	query = `
+		select
+			c.id, name, color, created_at
+		from
+			category c
+		inner join
+			task_category tc on c.id = tc.category_id
+		where
+			task_id = $1
+	`
+
+	rows, err := tr.db.Query(query, t.ID)
+	if err != nil {
+		err = errorInRow(table, "get", err)
+		return
+	}
+
+	cs := make([]*task.Category, 0)
+	for rows.Next() {
+		c := new(task.Category)
+		c.Name = new(string)
+		c.Color = new(string)
+		err = rows.Scan(&c.ID, &c.Name, &c.Color, &c.CreatedAt)
+		if err != nil {
+			err = errorInRow(table, "scan", err)
+			cs = nil
+			return
+		}
+
+		cs = append(cs, c)
+	}
+	err = rows.Err()
+	if err != nil {
+		cs = nil
+		err = errorInRows(table, "scanning", err)
+		return
+	}
+
+	t.Categories = cs
 	return
 }
 

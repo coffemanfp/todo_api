@@ -88,7 +88,6 @@ create table if not exists task_category (
     id serial unique not null,
     task_id integer not null,
     category_id integer not null,
-    created_at timestamp not null,
 
     primary key (id),
     foreign key (task_id) references task(id),
