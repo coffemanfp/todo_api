@@ -189,6 +189,13 @@ func (tr TaskRepository) Search(search search.Search) (ts []*task.Task, err erro
 }
 
 func (tr TaskRepository) UpdateTask(t task.Task) (err error) {
+	tx, err := tr.db.Begin()
+	if err != nil {
+		err = errorInTx("begin", err)
+		return
+	}
+	defer tx.Rollback()
+
 	table := "task"
 	query := fmt.Sprintf(`
 		update
@@ -207,9 +214,47 @@ func (tr TaskRepository) UpdateTask(t task.Task) (err error) {
 			id = $10
 	`, table)
 
-	_, err = tr.db.Exec(query, t.Title, t.Description, t.ListID, t.Reminder, t.DueDate, t.Repeat, t.IsDone, t.IsAddedToMyDay, t.IsImportant, t.ID)
+	_, err = tx.Exec(query, t.Title, t.Description, t.ListID, t.Reminder, t.DueDate, t.Repeat, t.IsDone, t.IsAddedToMyDay, t.IsImportant, t.ID)
 	if err != nil {
 		err = errorInRow(table, "update", err)
+		return
+	}
+
+	table = "task_category"
+	query = fmt.Sprintf(`
+		delete from
+			%s
+		where
+			task_id = $1
+	`, table)
+
+	_, err = tr.db.Exec(query, t.ID)
+	if err != nil {
+		err = errorInRow(table, "delete", err)
+		return
+	}
+
+	table = "task_category"
+	query = fmt.Sprintf(`
+		insert into
+			%s(task_id, category_id)
+		values
+			($1, $2)
+		returning
+			id
+	`, table)
+
+	for _, c := range t.Categories {
+		_, err = tx.Exec(query, t.ID, c.ID)
+		if err != nil {
+			err = errorInRow(table, "insert", err)
+			return
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		err = errorInTx("commit", err)
 	}
 	return
 }

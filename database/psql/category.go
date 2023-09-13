@@ -40,7 +40,7 @@ func (cr CategoryRepository) CreateCategory(c task.Category) (id int, err error)
 	return
 }
 
-func (cr CategoryRepository) CreateCategoryBind(taskID, categoryID int) (id int, err error) {
+func (cr CategoryRepository) CreateCategoryBinds(binds []*task.CategoryTaskBind) (err error) {
 	table := "task_category"
 	query := fmt.Sprintf(`
 		insert into
@@ -50,9 +50,27 @@ func (cr CategoryRepository) CreateCategoryBind(taskID, categoryID int) (id int,
 		returning
 			id
 	`, table)
-	err = cr.db.QueryRow(query, taskID, categoryID).Scan(&id)
+
+	fail := func(err error) error {
+		return errorInRow(table, "transaction insert", err)
+	}
+
+	tx, err := cr.db.Begin()
 	if err != nil {
-		err = errorInRow(table, "insert", err)
+		return fail(err)
+	}
+	defer tx.Rollback()
+
+	for _, b := range binds {
+		_, err = tx.Exec(query, b.TaskID, b.CategoryID)
+		if err != nil {
+			return fail(err)
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		fail(err)
 	}
 	return
 }

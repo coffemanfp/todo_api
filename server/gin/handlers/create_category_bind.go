@@ -4,14 +4,14 @@ import (
 	"net/http"
 
 	"github.com/coffemanfp/todo/database"
-	"github.com/coffemanfp/todo/server/errors"
+	"github.com/coffemanfp/todo/task"
 	"github.com/gin-gonic/gin"
 )
 
 type CreateCategoryBind struct{}
 
 func (ccb CreateCategoryBind) Do(c *gin.Context) {
-	taskID, categoryID, ok := ccb.readCategoryBind(c)
+	binds, ok := ccb.readCategoryBinds(c)
 	if !ok {
 		return
 	}
@@ -21,43 +21,21 @@ func (ccb CreateCategoryBind) Do(c *gin.Context) {
 		return
 	}
 
-	id, ok := ccb.saveCategoryInDB(c, repo, taskID, categoryID)
+	ok = ccb.saveCategoryTaskBindsInDB(c, repo, binds)
 	if !ok {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"id": id,
-	})
+	c.Status(http.StatusCreated)
 }
 
-func (ccb CreateCategoryBind) readCategoryBind(c *gin.Context) (taskID, categoryID int, ok bool) {
-	taskID, ok = readIntFromURL(c, "taskId", true)
-	if !ok {
-		return
-	}
-	categoryID, ok = readIntFromURL(c, "categoryId", true)
-	if !ok {
-		return
-	}
-
-	if taskID == 0 {
-		err := errors.NewHTTPError(http.StatusUnprocessableEntity, "invalid task id: task id can't be equals or lower than zero (0)")
-		handleError(c, err)
-		ok = false
-		return
-	}
-
-	if categoryID == 0 {
-		err := errors.NewHTTPError(http.StatusUnprocessableEntity, "invalid category id: category id can't be equals or lower than zero (0)")
-		handleError(c, err)
-		ok = false
-	}
+func (ccb CreateCategoryBind) readCategoryBinds(c *gin.Context) (binds []*task.CategoryTaskBind, ok bool) {
+	ok = readRequestData(c, &binds)
 	return
 }
 
-func (ccb CreateCategoryBind) saveCategoryInDB(c *gin.Context, repo database.CategoryRepository, taskID, categoryID int) (id int, ok bool) {
-	id, err := repo.CreateCategoryBind(taskID, categoryID)
+func (ccb CreateCategoryBind) saveCategoryTaskBindsInDB(c *gin.Context, repo database.CategoryRepository, binds []*task.CategoryTaskBind) (ok bool) {
+	err := repo.CreateCategoryBinds(binds)
 	if err != nil {
 		handleError(c, err)
 		return

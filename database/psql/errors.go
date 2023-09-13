@@ -31,6 +31,14 @@ func errorInRow(table, action string, err error) error {
 	)
 }
 
+func errorInTx(action string, err error) error {
+	return errors.NewError(
+		parseErrorType(err),
+		fmt.Sprintf("failed to %s a transaction", action),
+		err.Error(),
+	)
+}
+
 func errorInRows(table, action string, err error) error {
 	return errors.NewError(
 		parseErrorType(err),

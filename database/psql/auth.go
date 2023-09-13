@@ -3,6 +3,7 @@ package psql
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/coffemanfp/todo/account"
 	"github.com/coffemanfp/todo/database"
@@ -43,6 +44,13 @@ func (ar AuthRepository) GetIdAndHashedPassword(account account.Account) (id int
 }
 
 func (ar AuthRepository) Register(account account.Account) (id int, err error) {
+	tx, err := ar.db.Begin()
+	if err != nil {
+		err = errorInTx("begin", err)
+		return
+	}
+	defer tx.Rollback()
+
 	table := "account"
 	query := fmt.Sprintf(`
 		insert into
@@ -53,9 +61,36 @@ func (ar AuthRepository) Register(account account.Account) (id int, err error) {
 			id
 	`, table)
 
-	err = ar.db.QueryRow(query, account.Name, account.LastName, account.Nickname, account.Email, account.Password, account.CreatedAt).Scan(&id)
+	err = tx.QueryRow(query, account.Name, account.LastName, account.Nickname, account.Email, account.Password, account.CreatedAt).Scan(&id)
 	if err != nil {
 		err = errorInRow(table, "insert", err)
+		return
+	}
+
+	now := time.Now()
+	colors := []string{"blue", "red", "yellow", "black", "purple", "orange"}
+	table = "category"
+	query = fmt.Sprintf(`
+		insert into
+			%s(created_by, name, color, created_at)
+		values
+			($1, $2, $3, $4)
+		returning
+			id
+	`, table)
+	var lastCategoryID int
+
+	for _, color := range colors {
+		err = tx.QueryRow(query, id, "Category "+color, color, now).Scan(&lastCategoryID)
+		if err != nil {
+			err = errorInRow(table, "insert", err)
+			return
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		err = errorInTx("commit", err)
 	}
 	return
 }

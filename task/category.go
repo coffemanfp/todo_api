@@ -10,6 +10,11 @@ type Category struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 }
 
+type CategoryTaskBind struct {
+	TaskID     int `json:"task_id,omitempty"`
+	CategoryID int `json:"category_id,omitempty"`
+}
+
 var categoryColors = map[string]bool{
 	"red":    true,
 	"blue":   true,
