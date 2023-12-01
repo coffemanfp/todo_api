@@ -54,7 +54,7 @@ func (s Search) readSearch(c *gin.Context) (srch search.Search, ok bool) {
 		return
 	}
 
-	srch, err := search.New(clientID, title, isDone, isAddedToMyDay, isImportant, hasDueDate, expireSoon)
+	srch, err := search.New(clientID, &title, isDone, isAddedToMyDay, isImportant, hasDueDate, expireSoon)
 	if err != nil {
 		handleError(c, err)
 		return

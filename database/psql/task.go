@@ -160,9 +160,10 @@ func (tr TaskRepository) Search(search search.Search) (ts []*task.Task, err erro
 			($3::boolean is null or ($3::boolean is not null and is_important = $3)) and
 			($4::boolean is null or ($4::boolean is not null and nullif(due_date, '0001-01-01 00:00:00') is not null = $4)) and
 			($5::boolean is null or 
-				($5::boolean is not null and nullif(due_date, '0001-01-01 00:00:00') is not null = $5 and (due_date - '3 days'::interval < now()) = $5))
+				($5::boolean is not null and nullif(due_date, '0001-01-01 00:00:00') is not null = $5 and (due_date - '3 days'::interval < now()) = $5)) and
+			($6::text is null or ($6::text is not null and lower(title::text) LIKE CONCAT('%%',$6::text,'%%')))
 		`, table)
-	rows, err := tr.db.Query(query, search.IsDone, search.IsAddedToMyDay, search.IsImportant, search.HasDueDate, search.ExpireSoon)
+	rows, err := tr.db.Query(query, search.IsDone, search.IsAddedToMyDay, search.IsImportant, search.HasDueDate, search.ExpireSoon, search.Title)
 	if err != nil {
 		err = errorInRow(table, "get", err)
 		return

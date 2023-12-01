@@ -2,7 +2,7 @@ package search
 
 type Search struct {
 	ClientID       int
-	Title          string
+	Title          *string
 	IsDone         *bool
 	IsAddedToMyDay *bool
 	IsImportant    *bool
@@ -10,7 +10,7 @@ type Search struct {
 	ExpireSoon     *bool
 }
 
-func New(clientID int, title string, isDone, isAddedToMyDay, isImportant, hasDueDate, expireSoon *bool) (s Search, err error) {
+func New(clientID int, title *string, isDone, isAddedToMyDay, isImportant, hasDueDate, expireSoon *bool) (s Search, err error) {
 	s.ClientID = clientID
 	s.Title = title
 	s.IsDone = isDone
