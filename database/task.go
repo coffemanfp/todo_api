@@ -11,7 +11,7 @@ type TaskRepository interface {
 	CreateTask(task task.Task) (id int, err error)
 	UpdateTask(task task.Task) (err error)
 	DeleteTask(id int) (err error)
-	GetSomeTasks(page, createdBy int) (ts []*task.Task, err error)
+	GetSomeTasks(page, listID, createdBy int) (ts []*task.Task, err error)
 	GetTask(id int) (task task.Task, err error)
 	Search(search search.Search) (ts []*task.Task, err error)
 }

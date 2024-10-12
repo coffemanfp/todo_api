@@ -10,6 +10,7 @@ type List struct {
 	ID                   int       `json:"id,omitempty"`
 	Title                *string   `json:"title,omitempty"`
 	Description          *string   `json:"description,omitempty"`
+	Icon                 *string   `json:"icon,omitempty"`
 	BackgroundPictureURL *string   `json:"background_picture_url,omitempty"`
 	CreatedBy            int       `json:"created_by,omitempty"`
 	CreatedAt            time.Time `json:"created_at,omitempty"`
@@ -51,6 +52,10 @@ func populatePointerValues(listR List) (list List) {
 	if listR.Title != nil {
 		list.Title = new(string)
 		*list.Title = utils.RemoveSpaceAndConvertSpecialChars(*listR.Title)
+	}
+	if listR.Icon != nil {
+		list.Icon = new(string)
+		*list.Icon = utils.RemoveSpaceAndConvertSpecialChars(*listR.Icon)
 	}
 	if listR.Description != nil {
 		list.Description = new(string)

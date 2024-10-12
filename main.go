@@ -52,12 +52,17 @@ func setUpDatabase(conf config.ConfigInfo) (db database.Database, err error) {
 	if err != nil {
 		return
 	}
+	dashboardRepo, err := psql.NewDashboardRepository(db.Conn.(*psql.PostgreSQLConnector))
+	if err != nil {
+		return
+	}
 
 	db.Repositories = map[database.RepositoryID]interface{}{
-		database.AUTH_REPOSITORY:     authRepo,
-		database.LIST_REPOSITORY:     listRepo,
-		database.TASK_REPOSITORY:     taskRepo,
-		database.CATEGORY_REPOSITORY: categoryRepo,
+		database.AUTH_REPOSITORY:      authRepo,
+		database.LIST_REPOSITORY:      listRepo,
+		database.TASK_REPOSITORY:      taskRepo,
+		database.CATEGORY_REPOSITORY:  categoryRepo,
+		database.DASHBOARD_REPOSITORY: dashboardRepo,
 	}
 	return
 }

@@ -21,7 +21,12 @@ func (gst GetSomeTasks) Do(c *gin.Context) {
 		return
 	}
 
-	ts, ok := gst.getSomeTaskFromDB(c, repo, page, c.GetInt("id"))
+	listID, ok := gst.readListID(c)
+	if !ok {
+		return
+	}
+
+	ts, ok := gst.getSomeTaskFromDB(c, repo, page, c.GetInt("id"), listID)
 	if !ok {
 		return
 	}
@@ -29,8 +34,12 @@ func (gst GetSomeTasks) Do(c *gin.Context) {
 	c.JSON(http.StatusOK, ts)
 }
 
-func (gst GetSomeTasks) getSomeTaskFromDB(c *gin.Context, repo database.TaskRepository, page, createdBy int) (ts []*task.Task, ok bool) {
-	ts, err := repo.GetSomeTasks(page, createdBy)
+func (gst GetSomeTasks) readListID(c *gin.Context) (id int, ok bool) {
+	return readIntFromURL(c, "listID", true)
+}
+
+func (gst GetSomeTasks) getSomeTaskFromDB(c *gin.Context, repo database.TaskRepository, page, createdBy, listID int) (ts []*task.Task, ok bool) {
+	ts, err := repo.GetSomeTasks(page, listID, createdBy)
 	if err != nil {
 		handleError(c, err)
 		return

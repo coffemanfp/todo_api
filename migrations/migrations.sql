@@ -26,6 +26,7 @@ create table if not exists list (
     id serial unique not null,
     title varchar not null,
     description varchar,
+    icon varchar,
     background_picture_url varchar,
     created_at timestamp not null,
     created_by integer not null,

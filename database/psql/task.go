@@ -58,6 +58,7 @@ func (tr TaskRepository) GetTask(id int) (t task.Task, err error) {
 	if err != nil {
 		t = task.Task{}
 		err = errorInRow(table, "get", err)
+		return
 	}
 
 	query = `
@@ -102,20 +103,28 @@ func (tr TaskRepository) GetTask(id int) (t task.Task, err error) {
 	return
 }
 
-func (tr TaskRepository) GetSomeTasks(page, createdBy int) (ts []*task.Task, err error) {
+func (tr TaskRepository) GetSomeTasks(page, listID, createdBy int) (ts []*task.Task, err error) {
 	table := "task"
+
+	var conditionalWhereStr string
+
+	fmt.Println("listID:", listID)
+	if listID != 0 {
+		conditionalWhereStr = fmt.Sprintf("and list_id = %d", listID)
+	}
+
 	query := fmt.Sprintf(`
 		select
 			id, title, description, list_id, reminder, due_date, repeat, is_done, is_added_to_my_day, is_important, created_at, created_by
 		from
 			%s
 		where
-			created_by = $1
+			created_by = $1 %s
 		limit
 			$2
 		offset
 			$3
-	`, table)
+	`, table, conditionalWhereStr)
 
 	limit, offset := parsePagination(page)
 
@@ -161,9 +170,10 @@ func (tr TaskRepository) Search(search search.Search) (ts []*task.Task, err erro
 			($4::boolean is null or ($4::boolean is not null and nullif(due_date, '0001-01-01 00:00:00') is not null = $4)) and
 			($5::boolean is null or 
 				($5::boolean is not null and nullif(due_date, '0001-01-01 00:00:00') is not null = $5 and (due_date - '3 days'::interval < now()) = $5)) and
-			($6::text is null or ($6::text is not null and lower(title::text) LIKE CONCAT('%%',$6::text,'%%')))
+			($6::text is null or ($6::text is not null and lower(title::text) LIKE CONCAT('%%',lower($6::text),'%%'))) and
+			created_by = $7 
 		`, table)
-	rows, err := tr.db.Query(query, search.IsDone, search.IsAddedToMyDay, search.IsImportant, search.HasDueDate, search.ExpireSoon, search.Title)
+	rows, err := tr.db.Query(query, search.IsDone, search.IsAddedToMyDay, search.IsImportant, search.HasDueDate, search.ExpireSoon, search.Title, search.ClientID)
 	if err != nil {
 		err = errorInRow(table, "get", err)
 		return

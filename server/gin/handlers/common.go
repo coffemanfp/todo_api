@@ -72,6 +72,16 @@ func getCategoryRepository(c *gin.Context) (repo database.CategoryRepository, ok
 	return
 }
 
+func getDashboardRepository(c *gin.Context) (repo database.DashboardRepository, ok bool) {
+	repo, err := database.GetRepository[database.DashboardRepository](db, database.DASHBOARD_REPOSITORY)
+	if err != nil {
+		handleError(c, err)
+		return
+	}
+	ok = true
+	return
+}
+
 func readIntFromURL(c *gin.Context, param string, isQueryParam bool) (v int, ok bool) {
 	var p string
 	if isQueryParam {

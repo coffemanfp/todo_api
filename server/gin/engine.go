@@ -33,6 +33,7 @@ func New(conf config.ConfigInfo, db database.Database) server.Engine {
 	ge.setTaskHandlers(v1)
 	ge.setSearchHandlers(v1)
 	ge.setCategoriesHandlers(v1)
+	ge.setDashboardHandlers(v1)
 	return ge.r
 }
 
@@ -80,6 +81,15 @@ func (ge GinEngine) setSearchHandlers(r *gin.RouterGroup) {
 	product.Use(authorize(ge.conf.Server.SecretKey))
 	// Configure endpoint for searching products
 	product.GET("", handlers.Search{}.Do)
+}
+
+func (ge GinEngine) setDashboardHandlers(r *gin.RouterGroup) {
+	// Create a sub-group for dashboard routes
+	dashboard := r.Group("/users/:id/dashboard")
+	// Use authorization middleware to protect this route
+	dashboard.Use(authorize(ge.conf.Server.SecretKey))
+	// Configure endpoint for getting dashboard summary
+	dashboard.GET("", handlers.GetDashboardSummary{}.Do)
 }
 
 func (ge GinEngine) setCommonMiddlewares(r *gin.RouterGroup) {

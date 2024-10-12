@@ -29,6 +29,7 @@ func (s Search) Do(c *gin.Context) {
 
 	c.JSON(http.StatusOK, ts)
 }
+
 func (s Search) readSearch(c *gin.Context) (srch search.Search, ok bool) {
 	title := c.Query("title")
 	clientID := c.GetInt("id")

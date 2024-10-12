@@ -19,10 +19,14 @@ services:
         condition: service_healthy
     env_file:
       - .env
+    networks:
+      - net
   db:
+    build: database
     image: postgres
     restart: always
     user: postgres
+    hostname: database
     secrets:
       - db-password
     volumes:
@@ -38,8 +42,13 @@ services:
       interval: 2s
       timeout: 5s
       retries: 5
+    networks:
+      - net
 volumes:
   db-data:
 secrets:
   db-password:
     file: db/password.txt
+networks:
+  net:
+    name: shared-db-network

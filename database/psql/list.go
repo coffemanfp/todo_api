@@ -27,14 +27,14 @@ func (lr ListRepository) CreateList(l list.List) (id int, err error) {
 	table := "list"
 	query := fmt.Sprintf(`
 		insert into
-			%s(title, description, background_picture_url, created_by, created_at)
+			%s(title, description, icon, background_picture_url, created_by, created_at)
 		values
-			($1, $2, $3, $4, $5)
+			($1, $2, $3, $4, $5, $6)
 		returning
 			id
 	`, table)
 
-	err = lr.db.QueryRow(query, l.Title, l.Description, l.BackgroundPictureURL, l.CreatedBy, l.CreatedAt).Scan(&id)
+	err = lr.db.QueryRow(query, l.Title, l.Description, l.Icon, l.BackgroundPictureURL, l.CreatedBy, l.CreatedAt).Scan(&id)
 	if err != nil {
 		err = errorInRow(table, "insert", err)
 	}
@@ -45,14 +45,14 @@ func (lr ListRepository) GetList(id int) (l list.List, err error) {
 	table := "list"
 	query := fmt.Sprintf(`
 		select
-			id, title, description, background_picture_url, created_at, created_by
+			id, title, description, icon, background_picture_url, created_at, created_by
 		from
 			%s
 		where
 			id = $1
 	`, table)
 
-	err = lr.db.QueryRow(query, id).Scan(&l.ID, &l.Title, &l.Description, &l.BackgroundPictureURL, &l.CreatedAt, &l.CreatedBy)
+	err = lr.db.QueryRow(query, id).Scan(&l.ID, &l.Title, &l.Description, &l.Icon, &l.BackgroundPictureURL, &l.CreatedAt, &l.CreatedBy)
 	if err != nil {
 		err = errorInRow(table, "get", err)
 	}
@@ -63,7 +63,7 @@ func (lr ListRepository) GetSomeLists(page, createdBy int) (ls []*list.List, err
 	table := "list"
 	query := fmt.Sprintf(`
 		select
-			id, title, description, background_picture_url, created_at, created_by
+			id, title, description,	icon, background_picture_url, created_at, created_by
 		from
 			%s
 		where
@@ -87,7 +87,7 @@ func (lr ListRepository) GetSomeLists(page, createdBy int) (ls []*list.List, err
 		l := new(list.List)
 		l.Title = new(string)
 		l.Description = new(string)
-		err = rows.Scan(&l.ID, &l.Title, &l.Description, &l.BackgroundPictureURL, &l.CreatedAt, &l.CreatedBy)
+		err = rows.Scan(&l.ID, &l.Title, &l.Description, &l.Icon, &l.BackgroundPictureURL, &l.CreatedAt, &l.CreatedBy)
 		if err != nil {
 			err = errorInRow(table, "scan", err)
 			ls = nil
@@ -112,9 +112,10 @@ func (lr ListRepository) UpdateList(l list.List) (err error) {
 		set
 			title = coalesce($1, title),
 			description = coalesce($2, description),
-			background_picture_url = coalesce($3, background_picture_url)
+			background_picture_url = coalesce($3, background_picture_url),
+			icon = coalesce($4, icon)
 		where
-			id = $4
+			id = $5
 	`, table)
 
 	_, err = lr.db.Exec(query, l.Title, l.Description, l.BackgroundPictureURL, l.ID)

@@ -32,9 +32,9 @@ func (cl CreateList) Do(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"id": id,
-	})
+	l.ID = id
+
+	c.JSON(http.StatusCreated, l)
 }
 
 func (cl CreateList) readList(c *gin.Context) (l list.List, ok bool) {
