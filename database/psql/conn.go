@@ -24,7 +24,6 @@ type PostgreSQLConnector struct {
 }
 
 func (p *PostgreSQLConnector) Connect() (err error) {
-	fmt.Println(p.props)
 	db, err := sql.Open("postgres", connURL(p.props))
 	if err != nil {
 		return

@@ -75,6 +75,7 @@ func (l Login) searchCredentialsInDB(c *gin.Context, acct account.Account, repo 
 func (l Login) comparePassword(c *gin.Context, hash, password string) (ok bool) {
 	err := utils.CompareHashAndPassword(hash, password)
 	if err != nil {
+		err = errors.NewHTTPError(http.StatusUnauthorized, errors.UNAUTHORIZED_ERROR_MESSAGE)
 		handleError(c, err)
 		return
 	}

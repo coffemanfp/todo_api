@@ -108,7 +108,6 @@ func (tr TaskRepository) GetSomeTasks(page, listID, createdBy int) (ts []*task.T
 
 	var conditionalWhereStr string
 
-	fmt.Println("listID:", listID)
 	if listID != 0 {
 		conditionalWhereStr = fmt.Sprintf("and list_id = %d", listID)
 	}
